@@ -1,7 +1,7 @@
 while(true) do
   clear
   g++ database.cpp -o database
-  ./database add_payment me 100
+  ./database dump_current_round
   echo 'current round file contents:'
   cat current-round.txt
   read var

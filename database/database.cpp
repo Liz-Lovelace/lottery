@@ -22,11 +22,36 @@ void currentRoundAppend(Entry entry){
   currentRoundFile.close();
 }
 
-int main(int argc, char **argv){
-  if (argv[1] == "add_payment"){
-    //this yelds wrong time
-    unsigned long time = std::chrono::system_clock::now().time_since_epoch();// / std::chrono::milliseconds(1);
-    currentRoundAppend(Entry(argv[2], std::stoi(argv[3]), time));
+void currentRoundClear(){
+  std::ofstream currentRoundFile;
+  currentRoundFile.open("current-round.txt", std::ofstream::out | std::ofstream::trunc);
+  if (!currentRoundFile){
+    std::cout << "error opening current round file for clearing!";
+    throw;
   }
+  currentRoundFile.close();
+}
+
+std::string getRawCurrentRound(){
+  std::ifstream currentRoundFile;
+  currentRoundFile.open("current-round.txt");
+  std::string line = "", str = "";
+  while(std::getline(currentRoundFile, line)){
+    str += line + '\n';
+  }
+  currentRoundFile.close();
+  return str;
+}
+
+int main(int argc, char **argv){
+  if ((std::string)argv[1] == "add_payment"){
+    auto time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    currentRoundAppend(Entry(argv[2], std::stoi(argv[3]), time));
+  } else if ((std::string)argv[1] == "clear_current_round"){
+    currentRoundClear();
+  } else if ((std::string)argv[1] == "dump_current_round"){
+    std::cout << getRawCurrentRound();
+  } else 
+    std::cout << "command not specified!";
   return 0;
 }
