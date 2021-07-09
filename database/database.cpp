@@ -2,7 +2,23 @@
 #include <fstream>
 #include <string>
 #include <chrono>
+#include <limits.h>
+#include <unistd.h>
 
+std::string getexepath()
+{
+  char result[ PATH_MAX ];
+  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+  std::string fullpath = std::string( result, (count > 0) ? count : 0 );
+  int i = fullpath.size()-1;
+  while(fullpath[i] != '/'){
+    fullpath.pop_back();
+    i--;
+  }
+  return fullpath;
+}
+
+std::string currentRoundPath = getexepath() + "current-round.txt";
 
 struct Entry{
   std::string user = "";
@@ -13,7 +29,7 @@ struct Entry{
 
 void currentRoundAppend(Entry entry){
   std::fstream currentRoundFile;
-  currentRoundFile.open("current-round.txt", std::ios::app);
+  currentRoundFile.open(currentRoundPath, std::ios::app);
   if (!currentRoundFile){
     std::cout << "error opening current round file for appending!";
     throw;
@@ -24,7 +40,7 @@ void currentRoundAppend(Entry entry){
 
 void currentRoundClear(){
   std::ofstream currentRoundFile;
-  currentRoundFile.open("current-round.txt", std::ofstream::out | std::ofstream::trunc);
+  currentRoundFile.open(currentRoundPath, std::ofstream::out | std::ofstream::trunc);
   if (!currentRoundFile){
     std::cout << "error opening current round file for clearing!";
     throw;
@@ -34,7 +50,7 @@ void currentRoundClear(){
 
 std::string getRawCurrentRound(){
   std::ifstream currentRoundFile;
-  currentRoundFile.open("current-round.txt");
+  currentRoundFile.open(currentRoundPath);
   std::string line = "", str = "";
   while(std::getline(currentRoundFile, line)){
     str += line + '\n';
