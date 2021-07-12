@@ -5,7 +5,6 @@
 #include <limits.h>
 #include <unistd.h>
 #include <nlohmann/json.hpp>
-
 using json = nlohmann::json;
 
 std::string getexepath(){
@@ -20,67 +19,58 @@ std::string getexepath(){
   return fullpath;
 }
 
-std::string currentRoundPath = getexepath() + "current-round.txt";
+void strToFile(std::string str, std::string path){
+  std::ofstream file;
+  file.open(path);
+  if(!file){
+    std::cout << "can't open file" + path + " for writing!";
+    throw;
+  }
+  file << str;
+  file.close();
+}
 
-void currentRoundAddEntry(int userId, int money){
+std::string fileToStr(std::string path){
+  std::ifstream file(path);
+  std::string str((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+  return str;
+}
+
+void roundInit(std::string path){
+  strToFile("owo hewwo owo", path);
+}
+
+std::string roundAddEntry(std::string str, int userId, int paymentAmount){
   auto time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-  std::fstream currentRoundFile;
-  currentRoundFile.open(currentRoundPath, std::ios::app);
-  if (!currentRoundFile){
-    std::cout << "error opening current round file for appending!";
-    throw;
-  }
-  currentRoundFile << userId <<' '<< money <<' '<< time << '\n';
-  currentRoundFile.close();
-}
-
-void currentRoundClear(){
-  std::ofstream currentRoundFile;
-  currentRoundFile.open(currentRoundPath, std::ofstream::out | std::ofstream::trunc);
-  if (!currentRoundFile){
-    std::cout << "error opening current round file for clearing!";
-    throw;
-  }
-  currentRoundFile.close();
-}
-
-void currentRoundWriteStr(std::string str){
-  std::ofstream currentRoundFile;
-  currentRoundFile.open(currentRoundPath);
-  if(!currentRoundFile){
-    std::cout << "can't open current round file for writing!";
-    throw;
-  }
-  currentRoundFile << str;
-  currentRoundFile.close();
-}
-
-std::string getStrCurrentRound(){
-  std::ifstream currentRoundFile;
-  currentRoundFile.open(currentRoundPath);
-  std::string line = "", str = "";
-  while(std::getline(currentRoundFile, line)){
-    str += line + '\n';
-  }
-  currentRoundFile.close();
+  std::fstream RoundFile;
+  str += "\n" + std::to_string(userId) + " " + std::to_string(paymentAmount) + " " + std::to_string(time);
+  //implement!
   return str;
 }
 
 int main(int argc, char **argv){
-  json sample;
-  sample["hey"] = 10;
-  currentRoundWriteStr(sample.dump());
-  json fileJson = json::parse(getStrCurrentRound());
-  std::cout << fileJson["hey"];
+  std::string contextFolderPath = getexepath();
+  std::string currentRoundPath = contextFolderPath + "current-round.txt";
   if(argc > 1){
-    if ((std::string)argv[1] == "add_payment"){
-      currentRoundAddEntry(std::stoi(argv[2]), std::stoi(argv[3]));
-    } else if ((std::string)argv[1] == "clear_current_round"){
-      currentRoundClear();
-    } else if ((std::string)argv[1] == "dump_current_round"){
-      std::cout << getStrCurrentRound();
-    } else 
-      std::cout << "command not specified!";
+    std::string command = argv[1];
+    if (command == "cr_init"){
+      roundInit(currentRoundPath);
+    }
+    else if (command == "cr_new_entry"){
+      std::string crContents = fileToStr(currentRoundPath);
+      int userId = std::stoi(argv[2]);
+      int paymentAmount = std::stoi(argv[3]);
+      crContents = roundAddEntry(crContents, userId, paymentAmount);
+      strToFile(crContents, currentRoundPath);
+    } 
+    else if (command == "cr_dump"){
+      std::cout << fileToStr(currentRoundPath);
+    }
+    else if (command == "cr_clear"){
+      strToFile("", currentRoundPath);
+    }
+    else 
+      std::cout << "command not recognized";
   }
   return 0;
 }
