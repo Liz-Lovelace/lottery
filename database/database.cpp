@@ -51,10 +51,10 @@ json roundInit(std::string prizeName, int ticketCost, int ticketGoal){
   return j;
 }
 
-json roundAddEntry(json j, int userId, int paymentAmount){
+json roundAddEntry(json j, int userId, int ticketsBought){
   json entry;
   entry["user_id"] = userId;
-  entry["payment_amount"] = paymentAmount;
+  entry["tickets_bought"] = ticketsBought;
   entry["operation_time"] = timeNow();
   j["entries"] += entry;
   return j;
@@ -83,8 +83,8 @@ int main(int argc, char **argv){
       json crJson = json::parse(crContents);
       assert(argv[2] && argv[3]);
       int userId = std::stoi(argv[2]);
-      int paymentAmount = std::stoi(argv[3]);
-      crJson = roundAddEntry(crJson, userId, paymentAmount);
+      int ticketsBought = std::stoi(argv[3]);
+      crJson = roundAddEntry(crJson, userId, ticketsBought);
       strToFile(crJson.dump(2), currentRoundPath);
     } 
     else if (command == "cr_dump"){
@@ -94,7 +94,7 @@ int main(int argc, char **argv){
       strToFile("", currentRoundPath);
     }
     else 
-      std::cout << "command not recognized";
+      std::cerr << "command not recognized";
   }
   return 0;
 }
