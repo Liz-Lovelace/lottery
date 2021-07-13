@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <unistd.h>
 #include <nlohmann/json.hpp>
+#include <assert.h>
 using json = nlohmann::json;
 
 std::string getexepath(){
@@ -16,16 +17,14 @@ std::string getexepath(){
     fullpath.pop_back();
     i--;
   }
+  assert(fullpath.size() > 0);
   return fullpath;
 }
 
 void strToFile(std::string str, std::string path){
   std::ofstream file;
   file.open(path);
-  if(!file){
-    std::cout << "can't open file" + path + " for writing!";
-    throw;
-  }
+  assert(file);
   file << str;
   file.close();
 }
@@ -36,16 +35,29 @@ std::string fileToStr(std::string path){
   return str;
 }
 
-void roundInit(std::string path){
-  strToFile("owo hewwo owo", path);
+int timeNow(){
+  return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-std::string roundAddEntry(std::string str, int userId, int paymentAmount){
-  auto time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-  std::fstream RoundFile;
-  str += "\n" + std::to_string(userId) + " " + std::to_string(paymentAmount) + " " + std::to_string(time);
-  //implement!
-  return str;
+json roundInit(std::string prizeName, int ticketCost, int ticketGoal){
+  json j;
+  assert(ticketGoal > 0);
+  j["info"]["prize_name"] = prizeName;
+  j["info"]["ticket_cost"] = ticketCost;
+  j["info"]["ticket_goal"] = ticketGoal;
+  
+  j["info"]["creation_time"] = timeNow();
+  j["entries"] = {};
+  return j;
+}
+
+json roundAddEntry(json j, int userId, int paymentAmount){
+  json entry;
+  entry["user_id"] = userId;
+  entry["payment_amount"] = paymentAmount;
+  entry["operation_time"] = timeNow();
+  j["entries"] += entry;
+  return j;
 }
 
 int main(int argc, char **argv){
@@ -54,14 +66,26 @@ int main(int argc, char **argv){
   if(argc > 1){
     std::string command = argv[1];
     if (command == "cr_init"){
-      roundInit(currentRoundPath);
+      //TODO: this is ugly, need to refactor it somehow
+      assert(argv[2] && argv[3] && argv[4]);
+      std::string prizeName = argv[2];
+      int ticketCost = std::stoi(argv[3]);
+      int ticketGoal = std::stoi(argv[4]);
+      std::string content = roundInit(
+        prizeName,
+        ticketCost,
+        ticketGoal
+        ).dump(2);
+      strToFile(content, currentRoundPath);
     }
     else if (command == "cr_new_entry"){
       std::string crContents = fileToStr(currentRoundPath);
+      json crJson = json::parse(crContents);
+      assert(argv[2] && argv[3]);
       int userId = std::stoi(argv[2]);
       int paymentAmount = std::stoi(argv[3]);
-      crContents = roundAddEntry(crContents, userId, paymentAmount);
-      strToFile(crContents, currentRoundPath);
+      crJson = roundAddEntry(crJson, userId, paymentAmount);
+      strToFile(crJson.dump(2), currentRoundPath);
     } 
     else if (command == "cr_dump"){
       std::cout << fileToStr(currentRoundPath);

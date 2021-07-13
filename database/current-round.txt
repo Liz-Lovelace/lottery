@@ -1,3 +1,25 @@
-owo hewwo owo
-1 50 1626056238
-2 500 1626056243
+{
+  "entries": [
+    {
+      "operation_time": 1626135375,
+      "payment_amount": 50,
+      "user_id": 1
+    },
+    {
+      "operation_time": 1626135375,
+      "payment_amount": 100,
+      "user_id": 2
+    },
+    {
+      "operation_time": 1626135375,
+      "payment_amount": 150,
+      "user_id": 3
+    }
+  ],
+  "info": {
+    "creation_time": 1626135375,
+    "prize_name": "dog",
+    "ticket_cost": 50,
+    "ticket_goal": 20
+  }
+}
