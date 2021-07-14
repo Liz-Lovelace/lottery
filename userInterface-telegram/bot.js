@@ -21,10 +21,23 @@ async function safeExec(cmd, ctx = null){
   };
 }
 
-function countBoughtTickets(j){
+function countTotalBoughtTickets(j){
   sum = 0;
+  if(!j.entries)
+    return 0;
   for(let i = 0; i <j.entries.length; i++){
     sum += j.entries[i].tickets_bought;
+  }
+  return sum;
+}
+
+function countUserBoughtTickets(j, id){
+  sum = 0;
+  if (!j.entries)
+    return 0;
+  for(let i = 0; i <j.entries.length; i++){
+    if (j.entries[i].user_id == id)
+      sum += j.entries[i].tickets_bought;
   }
   return sum;
 }
@@ -43,11 +56,23 @@ async function sendRoundInfo(ctx){
     ctx.reply('empty.');
   ctx.reply(
     'Сейчас разыгрывается: ' + round.info.prize_name + '\n' +
-    'Билетов куплено: ' + countBoughtTickets(round) + '/' + round.info.ticket_goal  +'\n\n' +
+    'Билетов продано: ' + countTotalBoughtTickets(round) + '/' + round.info.ticket_goal  +'\n\n' +
     'Один билет стоит ' + round.info.ticket_cost + '₽');
 }
 
-bot.command('info', sendRoundInfo);
+async function sendSelfInfo(ctx){
+  let dump = await safeExec('../database/database cr_dump').catch(err=>ctx.reply(err));
+  let round = JSON.parse(dump);
+  if(!round)
+    ctx.reply('empty.');
+  userTicketCount = countUserBoughtTickets(round, ctx.from.id);
+  ctx.reply(
+    'У вас ' + userTicketCount + ' билетов\n' +
+    'Шанс выйграть: ' + userTicketCount/round.info.ticket_goal*100 + '%'
+  )
+}
+
+bot.command('info', ctx=>{sendRoundInfo(ctx); sendSelfInfo(ctx);});
 
 bot.command('buy', async ctx=>{
   let commands = ctx.message.text.split(' ');
@@ -64,6 +89,8 @@ bot.command('buy', async ctx=>{
   ctx.reply('Вы купили ' + ticketAmount + ' билет(ов)');
   await new Promise(resolve => setTimeout(resolve, 100));
   sendRoundInfo(ctx);
+  await new Promise(resolve => setTimeout(resolve, 100));
+  sendSelfInfo(ctx);
 });
 
 bot.launch();

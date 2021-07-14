@@ -1,165 +1,25 @@
 {
   "entries": [
     {
-      "operation_time": 1626213910,
+      "operation_time": 1626283694,
+      "tickets_bought": 10,
+      "user_id": 1311788757
+    },
+    {
+      "operation_time": 1626283765,
       "tickets_bought": 2,
-      "user_id": 1
+      "user_id": 1311788757
     },
     {
-      "operation_time": 1626213914,
-      "tickets_bought": 3,
-      "user_id": 2
-    },
-    {
-      "operation_time": 1626213924,
-      "tickets_bought": 3,
-      "user_id": 3
-    },
-    {
-      "operation_time": 1626217204,
+      "operation_time": 1626283770,
       "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217255,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217258,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217259,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217261,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217267,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217276,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217278,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217361,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217403,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217421,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217433,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217437,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626217444,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218274,
-      "tickets_bought": 10,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218339,
-      "tickets_bought": 10,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218346,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218356,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218366,
-      "tickets_bought": 10,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218436,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218439,
-      "tickets_bought": 10,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218442,
-      "tickets_bought": 10,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218444,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218484,
-      "tickets_bought": 1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218491,
-      "tickets_bought": 0,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218496,
-      "tickets_bought": -1,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218537,
-      "tickets_bought": 10000000,
-      "user_id": 1311788757
-    },
-    {
-      "operation_time": 1626218545,
-      "tickets_bought": 20,
       "user_id": 1311788757
     }
   ],
   "info": {
-    "creation_time": 1626213705,
-    "prize_name": "АйФон10S",
-    "ticket_cost": 1000,
-    "ticket_goal": 10
+    "creation_time": 1626283629,
+    "prize_name": "dog",
+    "ticket_cost": 200,
+    "ticket_goal": 20
   }
 }
