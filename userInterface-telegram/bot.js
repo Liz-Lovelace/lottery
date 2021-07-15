@@ -46,7 +46,9 @@ function countUserBoughtTickets(j, id){
 const bot = new Telegraf(syncFileToStr(__basedir + '/tokens/test-token.txt'));
 
 bot.start(ctx=>{
-  ctx.reply('Oh hello there!');
+  ctx.reply('Чтобы посмотреть информацию, введите /info\n' + 
+    'Чтобы купить билеты, введите /buy X, где Х это число билетов'
+  );
 });
 
 async function sendRoundInfo(ctx){
