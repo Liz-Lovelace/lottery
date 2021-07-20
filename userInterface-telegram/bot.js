@@ -2,12 +2,11 @@ const {Telegraf} = require('telegraf');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require ('fs');
-const emoji = require('node-emoji');
 global.__basedir = __dirname;
-let sampledump = '{\n  "entries": [\n    {\n      "operation_time": 1626213910,\n      "tickets_bought": 2,\n      "user_id": 1\n    },\n    {\n      "operation_time": 1626213914,\n      "tickets_bought": 3,\n      "user_id": 2\n    },\n    {\n      "operation_time": 1626213924,\n      "tickets_bought": 3,\n      "user_id": 3\n    }\n  ],\n  "info": {\n    "creation_time": 1626213705,\n    "prize_name": "АйФон10S",\n    "ticket_cost": 1000,\n    "ticket_goal": 10\n  }\n}';
+
 function syncFileToStr(fileName){
-  let token = fs.readFileSync(fileName, {encoding:'utf8', flag:'r'});
-  return token;
+  let str = fs.readFileSync(fileName, {encoding:'utf8', flag:'r'});
+  return str;
 }
 
 async function safeExec(cmd, ctx = null){
@@ -42,13 +41,20 @@ function countUserBoughtTickets(j, id){
   return sum;
 }
 
-
 const bot = new Telegraf(syncFileToStr(__basedir + '/tokens/test-token.txt'));
 
 bot.start(ctx=>{
   ctx.reply('Чтобы посмотреть информацию, введите /info\n' + 
-    'Чтобы купить билеты, введите /buy X, где Х это число билетов'
-  );
+    'Чтобы купить билеты, введите /buy X, где Х это число билетов', {
+      reply_markup: {
+        keyboard: [
+          [
+            {text:"credits"},
+            {text:"api"}
+          ]
+        ]
+      }
+    });
 });
 
 async function sendRoundInfo(ctx){
