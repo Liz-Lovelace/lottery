@@ -2,6 +2,7 @@ const {Telegraf} = require('telegraf');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require ('fs');
+const emj = require('node-emoji');
 global.__basedir = __dirname;
 
 function syncFileToStr(fileName){
@@ -9,10 +10,10 @@ function syncFileToStr(fileName){
   return str;
 }
 
-async function safeExec(cmd, ctx = null){
+async function safeExec(cmd){
   try {
     let {stdout, stderr} = await exec(__basedir + '/' + cmd);
-    if (stderr) throw stderr;
+    if (stderr) {console.log(stderr); throw stderr;}
     return stdout;
   } catch(err){
     console.log(err); 
@@ -41,22 +42,6 @@ function countUserBoughtTickets(j, id){
   return sum;
 }
 
-const bot = new Telegraf(syncFileToStr(__basedir + '/tokens/test-token.txt'));
-
-bot.start(ctx=>{
-  ctx.reply('Чтобы посмотреть информацию, введите /info\n' + 
-    'Чтобы купить билеты, введите /buy X, где Х это число билетов', {
-      reply_markup: {
-        keyboard: [
-          [
-            {text:"credits"},
-            {text:"api"}
-          ]
-        ]
-      }
-    });
-});
-
 async function sendRoundInfo(ctx){
   let dump = await safeExec('../database/database cr_dump').catch(err=>ctx.reply(err));
   let round = JSON.parse(dump);
@@ -80,25 +65,77 @@ async function sendSelfInfo(ctx){
   )
 }
 
+
+const bot = new Telegraf(syncFileToStr(__basedir + '/tokens/test-token.txt'));
+
+let text = {
+  // keyboard buttons
+  btn: {
+    instructions : 'Как это работает ' + emj.get('question'),
+    roundInfo : 'Что сейчас разыгрывается ' + emj.get('game_die'),
+    selfInfo : 'Сколько у меня билетов ' + emj.get('information_source'),
+    purchaseTickets : 'Купить билеты ' + emj.get('admission_tickets'),
+    other : 'Прочее... ' + emj.get('star'), 
+  },
+  long: {
+    instructions: 'Здесь будут инструкции',
+    other: 'Здесь будет ссылка на телеграм канал и возможно что-нибудь ещё',
+  },
+  //other
+  howManyTickets: 'Сколько вы хотите купить?',
+  operationSuccess: 'Операция успешна!',
+  operationFailure: 'Что-то пошло не так, напишите админу!',
+}
+
+let forceReply = {reply_markup: {force_reply: true}};
+let mainMenu = {
+  reply_markup: {keyboard: [
+      [{text:text.btn.instructions},{text:text.btn.roundInfo}],
+      [{text:text.btn.purchaseTickets},{text:text.btn.other}],
+  ]}
+};
+bot.start(ctx=>{
+  ctx.reply(
+    'menu instructions placeholder', mainMenu);
+});
+
+bot.on('message', async ctx=>{  
+  switch(ctx.message.text){
+    case text.btn.instructions:
+      ctx.reply(text.long.instructions);
+      return;
+    case text.btn.roundInfo:
+      sendRoundInfo(ctx);
+      return;
+    case text.btn.selfInfo:
+      sendSelfInfo(ctx);
+      return;
+    case text.btn.purchaseTickets:
+      ctx.reply(text.howManyTickets, forceReply);
+      return;
+    case text.btn.other:
+      ctx.reply(text.long.other);
+      return;
+  }
+  
+  if(ctx.message.reply_to_message)
+    switch(ctx.message.reply_to_message.text){
+      case text.howManyTickets:
+        let result = await buyTickets(ctx, ctx.message.text);
+        if (result == 0)
+          ctx.reply(text.operationSuccess, mainMenu);
+        else
+          ctx.reply(text.operationFailure, mainMenu);
+        return;
+    }
+});
+
 bot.command('info', ctx=>{sendRoundInfo(ctx); sendSelfInfo(ctx);});
 
-bot.command('buy', async ctx=>{
-  let commands = ctx.message.text.split(' ');
-  if (commands.length < 2 || isNaN(commands[1])){
-    ctx.reply('Чтобы купить билеты, напишите \n' +
-    '/buy [число билетов] \n' +
-    'пример: /buy 3');
-    return;
-  }
-  let ticketAmount = commands[1];
-  if (isNaN(ticketAmount) || ticketAmount < 1) return;
-  await safeExec('../database/database cr_new_entry '+ ctx.message.from.id + ' ' +ticketAmount).catch(err=>ctx.reply(err));
-  //TODO: fix this garbage -----------------------v
-  ctx.reply('Вы купили ' + ticketAmount + ' билет(ов)');
-  await new Promise(resolve => setTimeout(resolve, 100));
-  sendRoundInfo(ctx);
-  await new Promise(resolve => setTimeout(resolve, 100));
-  sendSelfInfo(ctx);
-});
+async function buyTickets(ctx, amount){
+  let code = 0;
+  let result = await safeExec('../database/database cr_new_entry '+ ctx.message.from.id + ' ' +amount).catch(err=>{console.log(err); code = 1});
+  return code;
+};
 
 bot.launch();
