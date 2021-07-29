@@ -4,8 +4,8 @@
 #include <chrono>
 #include <limits.h>
 #include <unistd.h>
-#include <nlohmann/json.hpp>
 #include <assert.h>
+#include "include/json.hpp"
 using json = nlohmann::json;
 
 std::string getexepath(){
@@ -24,7 +24,7 @@ std::string getexepath(){
 void strToFile(std::string str, std::string path){
   std::ofstream file;
   file.open(path);
-  assert(file);
+  assert("file.open() failed" && file);
   file << str;
   file.close();
 }
@@ -40,8 +40,8 @@ int timeNow(){
 }
 
 json roundInit(std::string prizeName, int ticketCost, int ticketGoal){
-  json j;
   assert(ticketGoal > 0);
+  json j;
   j["info"]["prize_name"] = prizeName;
   j["info"]["ticket_cost"] = ticketCost;
   j["info"]["ticket_goal"] = ticketGoal;
@@ -63,38 +63,32 @@ json roundAddEntry(json j, int userId, int ticketsBought){
 int main(int argc, char **argv){
   std::string contextFolderPath = getexepath();
   std::string currentRoundPath = contextFolderPath + "current-round.txt";
-  if(argc > 1){
-    std::string command = argv[1];
-    if (command == "cr_init"){
-      //TODO: this is ugly, need to refactor it somehow
-      assert(argv[2] && argv[3] && argv[4]);
-      std::string prizeName = argv[2];
-      int ticketCost = std::stoi(argv[3]);
-      int ticketGoal = std::stoi(argv[4]);
-      std::string content = roundInit(
-        prizeName,
-        ticketCost,
-        ticketGoal
-        ).dump(2);
-      strToFile(content, currentRoundPath);
-    }
-    else if (command == "cr_new_entry"){
-      std::string crContents = fileToStr(currentRoundPath);
-      json crJson = json::parse(crContents);
-      assert(argv[2] && argv[3]);
-      int userId = std::stoi(argv[2]);
-      int ticketsBought = std::stoi(argv[3]);
-      crJson = roundAddEntry(crJson, userId, ticketsBought);
-      strToFile(crJson.dump(2), currentRoundPath);
-    } 
-    else if (command == "cr_dump"){
-      std::cout << fileToStr(currentRoundPath);
-    }
-    else if (command == "cr_clear"){
-      strToFile("", currentRoundPath);
-    }
-    else 
-      std::cerr << "command not recognized";
+  assert("no command provided" && argc > 1);
+  std::string command = argv[1];
+  if (command == "cr_init"){
+    assert("wrong argument count" && argc == 5);
+    std::string content = roundInit(
+      argv[2],            //prizeName
+      std::stoi(argv[3]), //ticketCost
+      std::stoi(argv[4])  //ticketGoal
+      ).dump(2);
+    strToFile(content, currentRoundPath);
   }
+  else if (command == "cr_new_entry"){
+    json crJson = json::parse(fileToStr(currentRoundPath));
+    assert("wrong argument count" && argc == 4);
+    crJson = roundAddEntry(
+      crJson,
+      std::stoi(argv[2]), //userId
+      std::stoi(argv[3])  //ticketsBought
+    );
+    strToFile(crJson.dump(2), currentRoundPath);
+  } 
+  else if (command == "cr_dump")
+    std::cout << fileToStr(currentRoundPath);
+  else if (command == "cr_clear")
+    strToFile("", currentRoundPath);
+  else 
+    std::cerr << "command not recognized";
   return 0;
 }

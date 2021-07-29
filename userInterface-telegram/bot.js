@@ -49,8 +49,14 @@ async function sendRoundInfo(ctx){
     ctx.reply('empty.');
   ctx.reply(
     'Сейчас разыгрывается: ' + round.info.prize_name + '\n' +
-    'Билетов продано: ' + countTotalBoughtTickets(round) + '/' + round.info.ticket_goal  +'\n\n' +
-    'Один билет стоит ' + round.info.ticket_cost + '₽');
+    'Алмазиков продано: ' + countTotalBoughtTickets(round) + '/' + round.info.ticket_goal  +'\n\n' +
+    'Один алмазик стоит ' + round.info.ticket_cost + '₽');
+}
+
+async function buyTickets(ctx, amount){
+  let code = 0;
+  let result = await safeExec('../database/database cr_new_entry '+ ctx.message.from.id + ' ' +amount).catch(err=>{console.log(err); code = 1});
+  return code;
 }
 
 async function sendSelfInfo(ctx){
@@ -60,7 +66,7 @@ async function sendSelfInfo(ctx){
     ctx.reply('empty.');
   userTicketCount = countUserBoughtTickets(round, ctx.from.id);
   ctx.reply(
-    'У вас ' + userTicketCount + ' билетов\n' +
+    'У вас ' + userTicketCount + emj.get('gem')+'\n' +
     'Шанс выйграть: ' + userTicketCount/round.info.ticket_goal*100 + '%'
   )
 }
@@ -68,13 +74,15 @@ async function sendSelfInfo(ctx){
 
 const bot = new Telegraf(syncFileToStr(__basedir + '/tokens/test-token.txt'));
 
+
+
 let text = {
   // keyboard buttons
   btn: {
     instructions : 'Как это работает ' + emj.get('question'),
     roundInfo : 'Что сейчас разыгрывается ' + emj.get('game_die'),
-    selfInfo : 'Сколько у меня билетов ' + emj.get('information_source'),
-    purchaseTickets : 'Купить билеты ' + emj.get('admission_tickets'),
+    selfInfo : 'Сколько у меня алмазиков ' + emj.get('information_source'),
+    purchaseTickets : 'Купить алмазики ' + emj.get('gem'),
     other : 'Прочее... ' + emj.get('star'), 
   },
   long: {
@@ -96,10 +104,22 @@ let mainMenu = {
 };
 bot.start(ctx=>{
   ctx.reply(
-    'menu instructions placeholder', mainMenu);
+    text.long.instructions, mainMenu);
 });
 
+
 bot.on('message', async ctx=>{  
+  if(ctx.message.reply_to_message)
+    switch(ctx.message.reply_to_message.text){
+      case text.howManyTickets:
+        let result = await buyTickets(ctx, ctx.message.text);
+        if (result == 0)
+          ctx.reply(text.operationSuccess, mainMenu);
+        else
+          ctx.reply(text.operationFailure, mainMenu);
+        return;
+    }
+
   switch(ctx.message.text){
     case text.btn.instructions:
       ctx.reply(text.long.instructions);
@@ -118,24 +138,6 @@ bot.on('message', async ctx=>{
       return;
   }
   
-  if(ctx.message.reply_to_message)
-    switch(ctx.message.reply_to_message.text){
-      case text.howManyTickets:
-        let result = await buyTickets(ctx, ctx.message.text);
-        if (result == 0)
-          ctx.reply(text.operationSuccess, mainMenu);
-        else
-          ctx.reply(text.operationFailure, mainMenu);
-        return;
-    }
 });
-
-bot.command('info', ctx=>{sendRoundInfo(ctx); sendSelfInfo(ctx);});
-
-async function buyTickets(ctx, amount){
-  let code = 0;
-  let result = await safeExec('../database/database cr_new_entry '+ ctx.message.from.id + ' ' +amount).catch(err=>{console.log(err); code = 1});
-  return code;
-};
 
 bot.launch();
