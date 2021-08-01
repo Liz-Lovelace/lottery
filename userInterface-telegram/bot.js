@@ -22,24 +22,23 @@ async function safeExec(cmd){
 }
 
 function countTotalBoughtTickets(j){
-  sum = 0;
-  if(!j.entries)
+  if(!j.players)
     return 0;
-  for(let i = 0; i <j.entries.length; i++){
-    sum += j.entries[i].tickets_bought;
+  sum = 0;
+  for(let i = 0; i < j.players.length; i++){
+    sum += j.players[i].total_tickets_bought;
   }
   return sum;
 }
 
-function countUserBoughtTickets(j, id){
+function userTotalBoughtTickets(j, id){
   sum = 0;
-  if (!j.entries)
+  if (!j.players)
     return 0;
-  for(let i = 0; i <j.entries.length; i++){
-    if (j.entries[i].user_id == id)
-      sum += j.entries[i].tickets_bought;
-  }
-  return sum;
+  for(let i = 0; i <j.players.length; i++)
+    if (j.players[i].user_id == id)
+      return j.players[i].total_tickets_bought;
+  throw "couldn't find user to count tickets!";
 }
 
 async function sendRoundInfo(ctx){
@@ -64,7 +63,7 @@ async function sendSelfInfo(ctx){
   let round = JSON.parse(dump);
   if(!round)
     ctx.reply('empty.');
-  userTicketCount = countUserBoughtTickets(round, ctx.from.id);
+  userTicketCount = userTotalBoughtTickets(round, ctx.from.id);
   ctx.reply(
     'У вас ' + userTicketCount + emj.get('gem')+'\n' +
     'Шанс выйграть: ' + userTicketCount/round.info.ticket_goal*100 + '%'
@@ -98,8 +97,8 @@ let text = {
 let forceReply = {reply_markup: {force_reply: true}};
 let mainMenu = {
   reply_markup: {keyboard: [
-      [{text:text.btn.instructions},{text:text.btn.roundInfo}],
-      [{text:text.btn.purchaseTickets},{text:text.btn.other}],
+      [{text:text.btn.instructions},{text:text.btn.roundInfo},{text:text.btn.other}],
+      [{text:text.btn.purchaseTickets},{text:text.btn.selfInfo}],
   ]}
 };
 bot.start(ctx=>{

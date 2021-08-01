@@ -47,16 +47,31 @@ json roundInit(std::string prizeName, int ticketCost, int ticketGoal){
   j["info"]["ticket_goal"] = ticketGoal;
   
   j["info"]["creation_time"] = timeNow();
-  j["entries"] = {};
+  j["players"] = {};
   return j;
 }
 
-json roundAddEntry(json j, int userId, int ticketsBought){
-  json entry;
-  entry["user_id"] = userId;
-  entry["tickets_bought"] = ticketsBought;
-  entry["operation_time"] = timeNow();
-  j["entries"] += entry;
+json roundAddTransaction(json j, int userId, int ticketsBought){
+  //finds index of player in the array "players"
+  int playerN = -1;
+  for (unsigned int i = 0; i < j["players"].size(); i++)
+    if (j["players"][i]["user_id"] == userId)
+      playerN = i;
+  
+  // adds a new entry into array "players"
+  if (playerN == -1){
+    json player;
+    player["total_tickets_bought"] = 0;
+    player["user_id"] = userId;
+    j["players"] += player;
+    playerN = j["players"].size()-1;
+  }
+  
+  json transaction;
+  transaction["operation_time"] = timeNow();
+  transaction["tickets_bought"] = ticketsBought;
+  j["players"][playerN]["transactions"] += transaction;
+  j["players"][playerN]["total_tickets_bought"] = (int)j["players"][playerN]["total_tickets_bought"] + ticketsBought;
   return j;
 }
 
@@ -77,7 +92,7 @@ int main(int argc, char **argv){
   else if (command == "cr_new_entry"){
     json crJson = json::parse(fileToStr(currentRoundPath));
     assert("wrong argument count" && argc == 4);
-    crJson = roundAddEntry(
+    crJson = roundAddTransaction(
       crJson,
       std::stoi(argv[2]), //userId
       std::stoi(argv[3])  //ticketsBought
