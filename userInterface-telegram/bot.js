@@ -10,6 +10,13 @@ function syncFileToStr(fileName){
   return str;
 }
 
+async function getUserData(field, id){
+  //call compiled database
+}
+async function setUserData(field, id){
+  //call compiled database 
+}
+
 async function safeExec(cmd){
   try {
     let {stdout, stderr} = await exec(__basedir + '/' + cmd);

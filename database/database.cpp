@@ -39,6 +39,26 @@ int timeNow(){
   return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+void userInfoInit(int id){
+  strToFile("{}", getexepath() + "/users/" + std::to_string(id));
+}
+
+std::string dumpUserInfo(int id){
+  return fileToStr(getexepath() + "/users/" + std::to_string(id));
+}
+
+auto getUserInfoField(std::string field, int id){
+  json j = json::parse(dumpUserInfo(id));
+  return j[field];
+}
+
+template <class T>
+void setUserInfoField(std::string field, T value, int id){
+  json j = json::parse(dumpUserInfo(id));
+  j[field] = value;
+  strToFile(j.dump(), getexepath() + "/users/" + std::to_string(id));
+}
+
 json roundInit(std::string prizeName, int ticketCost, int ticketGoal){
   assert(ticketGoal > 0);
   json j;
@@ -103,7 +123,26 @@ int main(int argc, char **argv){
     std::cout << fileToStr(currentRoundPath);
   else if (command == "cr_clear")
     strToFile("", currentRoundPath);
+  else if (command == "user_init"){
+    assert("usage: user_init 1234567" && argc == 3);
+    userInfoInit(std::stoi(argv[2]));
+  }
+  else if (command == "get_user_field"){
+    assert("usage: get_user_field field_name 1234567" && argc == 4);
+    std::cout << getUserInfoField(argv[2], std::stoi(argv[3]));
+  }
+  else if (command == "set_user_field"){
+    assert("usage: set_user_field field_name value 1234567" && argc == 5);
+    if((std::string)argv[3] == "True" || (std::string)argv[3] == "true"){setUserInfoField(argv[2], true, std::stoi(argv[4]));return 0;}
+    if((std::string)argv[3] == "False" || (std::string)argv[3] == "false"){setUserInfoField(argv[2], false, std::stoi(argv[4]));return 0;}
+    if((std::string)argv[3] == "Null" || (std::string)argv[3] == "null" || (std::string)argv[3] == "NULL" ){setUserInfoField(argv[2], nullptr, std::stoi(argv[4]));return 0;}
+    try{
+      setUserInfoField(argv[2], std::stoi(argv[3]), std::stoi(argv[4]));
+      return 0;
+    }catch(std::invalid_argument& err){}
+    setUserInfoField(argv[2], argv[3], std::stoi(argv[4]));
+  }
   else 
-    std::cerr << "command not recognized";
+    std::cerr << "command " + command + " not recognized!\n";
   return 0;
 }
