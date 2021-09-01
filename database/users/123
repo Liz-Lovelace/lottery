@@ -1,1 +1,6 @@
-{"aaaa":null,"agreement":true,"hello":"world","number":7}
+{
+  "aaaa": null,
+  "agreement": true,
+  "hello": "world",
+  "number": 7
+}
