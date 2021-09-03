@@ -10,22 +10,23 @@ function syncFileToStr(fileName){
   return str;
 }
 
-async function getUserData(field, id){
-  //call compiled database
-}
-async function setUserData(field, id){
-  //call compiled database 
-}
-
-async function safeExec(cmd){
+async function callDatabase(cmd){
   try {
-    let {stdout, stderr} = await exec(__basedir + '/' + cmd);
+    let {stdout, stderr} = await exec(__basedir + '/../database/database ' + cmd);
     if (stderr) {console.log(stderr); throw stderr;}
     return stdout;
   } catch(err){
     console.log(err); 
     throw err;
   };
+}
+
+async function getUserField(id, fieldName){
+  return await callDatabase('get_user_field ' + id + ' ' + fieldName);
+}
+
+async function setUserField(id, fieldName, value){
+  await callDatabase('set_user_field ' + id + ' ' + fieldName + ' ' + value);
 }
 
 function countTotalBoughtTickets(j){
@@ -49,7 +50,7 @@ function userTotalBoughtTickets(j, id){
 }
 
 async function sendRoundInfo(ctx){
-  let dump = await safeExec('../database/database cr_dump').catch(err=>ctx.reply(err));
+  let dump = await callDatabase('cr_dump').catch(err=>ctx.reply(err));
   let round = JSON.parse(dump);
   if(!round)
     ctx.reply('empty.');
@@ -61,12 +62,12 @@ async function sendRoundInfo(ctx){
 
 async function buyTickets(ctx, amount){
   let code = 0;
-  let result = await safeExec('../database/database cr_new_entry '+ ctx.message.from.id + ' ' +amount).catch(err=>{console.log(err); code = 1});
+  let result = await callDatabase('cr_new_entry '+ ctx.message.from.id + ' ' +amount).catch(err=>{console.log(err); code = 1});
   return code;
 }
 
 async function sendSelfInfo(ctx){
-  let dump = await safeExec('../database/database cr_dump').catch(err=>ctx.reply(err));
+  let dump = await callDatabase('cr_dump').catch(err=>ctx.reply(err));
   let round = JSON.parse(dump);
   if(!round)
     ctx.reply('empty.');
@@ -77,10 +78,7 @@ async function sendSelfInfo(ctx){
   )
 }
 
-
-const bot = new Telegraf(syncFileToStr(__basedir + '/tokens/test-token.txt'));
-
-
+const bot = new Telegraf(syncFileToStr(__basedir + '/tokens/telegram-token.txt'));
 
 let text = {
   // keyboard buttons
@@ -108,13 +106,32 @@ let mainMenu = {
       [{text:text.btn.purchaseTickets},{text:text.btn.selfInfo}],
   ]}
 };
+let yesNoMenu = {
+  reply_markup: {keyboard: [
+    ['yes', 'no']
+  ]}
+};
+
 bot.start(ctx=>{
+  callDatabase('user_init ' + ctx.from.id);
   ctx.reply(
-    text.long.instructions, mainMenu);
+    text.long.instructions, yesNoMenu);
 });
 
 
 bot.on('message', async ctx=>{  
+  //doesn't let user do anything else until they agreed to the user agreement
+  
+  if (await getUserField(ctx.from.id, 'user_agreement') != 'true'){
+    if (ctx.message.text == 'yes'){
+      await setUserField(ctx.from.id, 'user_agreement', true);
+      return;
+    }
+    ctx.reply('to get to do stuff, please agree to the user Agreement', yesNoMenu);
+    return;
+  }
+
+
   if(ctx.message.reply_to_message)
     switch(ctx.message.reply_to_message.text){
       case text.howManyTickets:
