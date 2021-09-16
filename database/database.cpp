@@ -19,6 +19,7 @@ int main(int argc, char **argv){
   assert("no command provided" && argc > 1);
   std::string command = argv[1];
   
+  //current round
   if (command == "cr_init"){
     assert("wrong argument count" && argc == 5);
     json contentj = roundInit(
@@ -46,25 +47,38 @@ int main(int argc, char **argv){
   else if (command == "cr_clear")
     strToFile("", currentRoundPath);
   
+  // user
   else if (command == "user_init"){
     assert("USAGE: user_init 1234567" && argc == 3);
-    strToFile("{}", usersFolderPath + argv[2]);
+    strToFile("{\"initialized\":true}", usersFolderPath + argv[2]);
   }
   
   else if (command == "get_user_field"){
     assert("USAGE: get_user_field 123 field_name" && argc == 4);
-    json userj = json::parse(fileToStr(usersFolderPath + argv[2]));
+    std::string userFilePath = usersFolderPath + argv[2];
+    std::string contents = fileToStr(userFilePath);
+    if (contents == "NULL"){
+      std::cout << "NULL";
+      return 0;
+    }
+    json userj = json::parse(contents);
     std::cout << userj[argv[3]];
   }
   
   else if (command == "set_user_field"){
     assert("usage: set_user_field 123 field_name value" && argc == 5);
     std::string userFilePath = usersFolderPath + argv[2];
-    json userj = json::parse(fileToStr(userFilePath));
+    std::string contents = fileToStr(userFilePath);
+    if (contents == "NULL"){
+      std::cout << "NULL";
+      return 0;
+    }
+    json userj = json::parse(contents);
     userj = setUserField(userj, argv[3], argv[4]);
     strToFile(userj.dump(2), userFilePath);
   }
   
+  //other
   else 
     std::cerr << "command " + command + " not recognized!\n";
   

@@ -34,6 +34,8 @@ void strToFile(std::string str, std::string path){
 
 std::string fileToStr(std::string path){
   std::ifstream file(path);
+  if (!file.is_open())
+    return "NULL";
   std::string str((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
   return str;
 }
