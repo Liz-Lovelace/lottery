@@ -1,0 +1,82 @@
+====AFTER=CLONING====
+Please store a telegram token in 
+userInterface-telegram/data/token.txt
+
+in order to start a round, call cr_init
+
+to start bot, run 
+node index.js
+
+====DATABASE=COMMANDS:====
+
+//initialize
+cr_init  Name SingleTicketCost TicketGoal
+
+//add tickets to user account
+cr_new_entry  Id ticketsBought
+
+//dump current round
+cr_dump
+
+//clear current round
+cr_clear
+
+//init empty user
+user_init  Id
+
+//get value of user field
+get_user_field  Id FieldName
+
+//set value of user field
+set_user_field  Id FieldName Value
+
+====EXAMPLE FILES:====
+
+// current-round.txt right after cr_init
+{
+  "info": {
+    "creation_time": 1632508031,
+    "prize_name": "TestMuffin",
+    "ticket_cost": 50,
+    "ticket_goal": 10
+  },
+  "players": null
+}
+
+// current-round.txt after three transactions from 2 users
+{
+  "info": {
+    "creation_time": 1632508031,
+    "prize_name": "TestMuffin",
+    "ticket_cost": 50,
+    "ticket_goal": 10
+  },
+  "players": [
+    { //this is player 111
+      "total_tickets_bought": 3,
+      "transactions": [
+        { "operation_time": 1632508218, "tickets_bought": 1},
+        { "operation_time": 1632508231, "tickets_bought": 2}
+      ],
+      "user_id": 111
+    },
+    { //this is player 222
+      "total_tickets_bought": 3,
+      "transactions": [
+        { "operation_time": 1632508225, "tickets_bought": 3}
+      ],
+      "user_id": 222
+    }
+  ]
+}
+
+// users/1 right after user_init
+{"initialized":true}
+
+// users/1 after some set_user_field
+{
+  "initialized": true,
+  "key1": "textvalue",
+  "nothing": null,
+  "number": 123
+}

@@ -9,12 +9,13 @@ using json = nlohmann::json;
   /*=================USER INFO=================*/
 
 json setUserField(json j, std::string field, std::string value){
-  transform(value.begin(), value.end(), value.begin(), ::tolower);
-  if(value == "true")
+  std::string lowerValue = value;
+  transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
+  if(lowerValue == "true")
     j[field] = true;
-  else if(value == "false")
+  else if(lowerValue == "false")
     j[field] = false;
-  else if(value == "null")
+  else if(lowerValue == "null")
     j[field] = nullptr;
   else try{
     j[field] = std::stoi(value);

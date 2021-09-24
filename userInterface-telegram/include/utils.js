@@ -7,9 +7,12 @@ function syncFileToStr(fileName){
 }
 
 async function callDatabase(cmd){
-  console.log('database ' + cmd);
   let {stdout, stderr} = await exec(__dirname + '/../../database/database ' + cmd);
-  console.log('  >' + stdout);
+  if (stdout.length < 30)
+    console.log(cmd + ' => ' + stdout);
+  else
+    console.log(cmd + ' => ' + stdout.substr(0, 30) + '...');
+  console.log();
   return stdout;
 }
 
@@ -21,6 +24,9 @@ async function getUserField(id, fieldName){
     return true;
   else if (str.toLowerCase() == 'false')
     return false;
+  //this removes the quotes (") around a string if needed
+  if (str[0] == '"' && str[str.length-1] == '"')
+    str = str.substr(1, str.length -2);
   return str;
 }
 
@@ -44,7 +50,7 @@ function userTotalBoughtTickets(j, id){
   for(let i = 0; i <j.players.length; i++)
     if (j.players[i].user_id == id)
       return j.players[i].total_tickets_bought;
-  throw "couldn't find user to count tickets!";
+  return 0;
 }
 
 module.exports = {syncFileToStr, callDatabase, getUserField, setUserField, countTotalBoughtTickets, userTotalBoughtTickets};

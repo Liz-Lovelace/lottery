@@ -1,3 +1,3 @@
 clear
-rm ../database/users/*
+#rm ../database/users/*
 node index.js

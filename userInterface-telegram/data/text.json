@@ -12,7 +12,8 @@
   "long": {
     "instructions": "Здесь будут инструкции",
     "other": "Здесь будет ссылка на телеграм канал и возможно что-нибудь ещё",
-    "userAgreement": "UserAgreementUserAgreementUserAgreementUserAgreementUserAgreementUserAgreementUserAgreement"
+    "userAgreement": "UserAgreementUserAgreementUserAgreementUserAgreementUserAgreementUserAgreementUserAgreement",
+    "userAgreementInstructions": "to get to do stuff, please use the buttons on the bottom to agree to the user agreement"
   },
   "howManyTickets": "Сколько вы хотите купить?",
   "operationSuccess": "Операция успешна!",

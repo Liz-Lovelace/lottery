@@ -21,7 +21,7 @@ int main(int argc, char **argv){
   
   //current round
   if (command == "cr_init"){
-    assert("wrong argument count" && argc == 5);
+    assert("usage: cr_init prizeName ticketCost ticketGoal" && argc == 5);
     json contentj = roundInit(
       argv[2],            //prizeName
       std::stoi(argv[3]), //ticketCost
@@ -75,6 +75,7 @@ int main(int argc, char **argv){
     }
     json userj = json::parse(contents);
     userj = setUserField(userj, argv[3], argv[4]);
+    std::cout << argv[4] << " in " << userj.dump(2);
     strToFile(userj.dump(2), userFilePath);
   }
   
